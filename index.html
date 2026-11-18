@@ -1,0 +1,415 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>
+/* Layout: one narrow column. Everyone sees the reveal card; the organiser also sees two steps below it (enter names, draw & publish). Pōhutukawa red on bush green. */
+:root{
+  --bg:#f3f5f1; --surface:#ffffff; --ink:#18241d; --muted:#5d6b62; --line:#d9e0d8;
+  --accent:#b8202f; --accent-ink:#ffffff; --bush:#1f5a3d; --bush-soft:#e3eee6;
+  --warn:#8a5a00; --warn-soft:#fbf0d6;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101814; --surface:#17221c; --ink:#e8efe9; --muted:#9db0a3; --line:#2a3a31;
+  --accent:#ef5a62; --accent-ink:#1a0d0e; --bush:#7fc79d; --bush-soft:#1d3127;
+  --warn:#f2c46b; --warn-soft:#33290f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101814; --surface:#17221c; --ink:#e8efe9; --muted:#9db0a3; --line:#2a3a31;
+  --accent:#ef5a62; --accent-ink:#1a0d0e; --bush:#7fc79d; --bush-soft:#1d3127;
+  --warn:#f2c46b; --warn-soft:#33290f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+.wrap{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--bush);font-weight:700}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(34px,8vw,46px);line-height:1.02;margin:4px 0 6px;text-wrap:balance}
+h1 span{color:var(--accent)}
+h2{font-family:var(--display);font-weight:700;font-size:20px;margin:0}
+.lede{color:var(--muted);margin:0;max-width:60ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.card[aria-disabled="true"]{opacity:.55}
+.step-head{display:flex;gap:12px;align-items:baseline}
+.num{font-family:var(--display);font-weight:800;color:var(--accent);font-size:20px}
+.note{font-size:14px;color:var(--muted);margin:0}
+.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:10px}
+.divider::before,.divider::after{content:"";flex:1;border-top:1px solid var(--line)}
+label{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px}
+label small{font-weight:400;color:var(--muted)}
+textarea{font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%;resize:vertical;font-weight:400}
+input[type=text]{font:inherit;font-size:17px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%}
+select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 18px;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.link{background:none;border:0;color:var(--bush);padding:0;text-decoration:underline;font-weight:400}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.msg{font-size:14px;padding:10px 12px;border-radius:9px;margin:0}
+.msg.warn{background:var(--warn-soft);color:var(--warn)}
+.msg.ok{background:var(--bush-soft);color:var(--bush)}
+.msg.err{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+.check{padding-top:6px}.check summary{cursor:pointer;color:var(--muted);font-size:14px}
+table{border-collapse:collapse;width:100%;font-size:15px}td,th{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}td.g{color:var(--muted);font-size:13px}
+.reveal{border:2px dashed var(--accent);border-radius:12px;padding:22px;text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.reveal .who{font-family:var(--display);font-weight:800;font-size:clamp(30px,8vw,40px);line-height:1.1;color:var(--accent);overflow-wrap:anywhere}
+.reveal .hints{font-size:15px;color:var(--muted);white-space:pre-wrap;max-width:44ch}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;cursor:pointer;display:flex;flex-direction:column;gap:6px;align-items:center}
+.drop.over{border-color:var(--bush);background:var(--bush-soft)}
+.map{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.groups{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:460px){.map,.groups{grid-template-columns:1fr}}
+.map label{font-size:13px;gap:4px}
+.group h3{margin:0 0 4px;font-size:14px;display:flex;justify-content:space-between}
+.group h3 span{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:400}
+.group ul{list-style:none;margin:0;padding:0;font-size:14px}
+.group li{padding:5px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.stack{display:flex;flex-direction:column;gap:8px}
+.live{display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;background:var(--bush-soft)}
+.live .big{font-family:var(--display);font-weight:800;font-size:30px;color:var(--bush);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:no-preference){.reveal{animation:pop .35s ease-out}@keyframes pop{from{transform:scale(.96);opacity:.4}to{transform:none;opacity:1}}}
+</style></head><body><title>Secret Santa Draw</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style id="page-style">
+/* Layout: one narrow column. Everyone sees the reveal card; the organiser also sees two steps below it (enter names, draw & publish). Pōhutukawa red on bush green. */
+:root{
+  --bg:#f3f5f1; --surface:#ffffff; --ink:#18241d; --muted:#5d6b62; --line:#d9e0d8;
+  --accent:#b8202f; --accent-ink:#ffffff; --bush:#1f5a3d; --bush-soft:#e3eee6;
+  --warn:#8a5a00; --warn-soft:#fbf0d6;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101814; --surface:#17221c; --ink:#e8efe9; --muted:#9db0a3; --line:#2a3a31;
+  --accent:#ef5a62; --accent-ink:#1a0d0e; --bush:#7fc79d; --bush-soft:#1d3127;
+  --warn:#f2c46b; --warn-soft:#33290f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101814; --surface:#17221c; --ink:#e8efe9; --muted:#9db0a3; --line:#2a3a31;
+  --accent:#ef5a62; --accent-ink:#1a0d0e; --bush:#7fc79d; --bush-soft:#1d3127;
+  --warn:#f2c46b; --warn-soft:#33290f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+.wrap{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--bush);font-weight:700}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(34px,8vw,46px);line-height:1.02;margin:4px 0 6px;text-wrap:balance}
+h1 span{color:var(--accent)}
+h2{font-family:var(--display);font-weight:700;font-size:20px;margin:0}
+.lede{color:var(--muted);margin:0;max-width:60ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.card[aria-disabled="true"]{opacity:.55}
+.step-head{display:flex;gap:12px;align-items:baseline}
+.num{font-family:var(--display);font-weight:800;color:var(--accent);font-size:20px}
+.note{font-size:14px;color:var(--muted);margin:0}
+.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:10px}
+.divider::before,.divider::after{content:"";flex:1;border-top:1px solid var(--line)}
+label{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px}
+label small{font-weight:400;color:var(--muted)}
+textarea{font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%;resize:vertical;font-weight:400}
+input[type=text]{font:inherit;font-size:17px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%}
+select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 18px;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.link{background:none;border:0;color:var(--bush);padding:0;text-decoration:underline;font-weight:400}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:focus-visible,select:focus-visible,input:focus-visible,.drop:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.msg{font-size:14px;padding:10px 12px;border-radius:9px;margin:0}
+.msg.warn{background:var(--warn-soft);color:var(--warn)}
+.msg.ok{background:var(--bush-soft);color:var(--bush)}
+.msg.err{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+.check{padding-top:6px}.check summary{cursor:pointer;color:var(--muted);font-size:14px}
+table{border-collapse:collapse;width:100%;font-size:15px}td,th{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}td.g{color:var(--muted);font-size:13px}
+.reveal{border:2px dashed var(--accent);border-radius:12px;padding:22px;text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.reveal .who{font-family:var(--display);font-weight:800;font-size:clamp(30px,8vw,40px);line-height:1.1;color:var(--accent);overflow-wrap:anywhere}
+.reveal .hints{font-size:15px;color:var(--muted);white-space:pre-wrap;max-width:44ch}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;cursor:pointer;display:flex;flex-direction:column;gap:6px;align-items:center}
+.drop.over{border-color:var(--bush);background:var(--bush-soft)}
+.map{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.groups{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:460px){.map,.groups{grid-template-columns:1fr}}
+.map label{font-size:13px;gap:4px}
+.group h3{margin:0 0 4px;font-size:14px;display:flex;justify-content:space-between}
+.group h3 span{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:400}
+.group ul{list-style:none;margin:0;padding:0;font-size:14px}
+.group li{padding:5px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.stack{display:flex;flex-direction:column;gap:8px}
+.live{display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;background:var(--bush-soft)}
+.live .big{font-family:var(--display);font-weight:800;font-size:30px;color:var(--bush);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:no-preference){.reveal{animation:pop .35s ease-out}@keyframes pop{from{transform:scale(.96);opacity:.4}to{transform:none;opacity:1}}}
+</style>
+<div id="app"></div>
+<script type="application/json" id="sealed">{"v":1,"at":"2026-11-13T23:41:30.635Z","salt":"c556ae2db58ab5c2e977d1e33a6f2b1f","counts":{"student":12,"staff":7},"example":false,"entries":{"058e29bf197a466e0bb7db36d59d8b95ca52d541a503d6d87d8aad96f1a90735":{"iv":"iL7GrSXnGQawi3mW","ct":"Ru2eQ3qx/TlcOBbFyLo+r1wdykwsnzfU3pZ5kIdLo9goOCRvnDjcAVC/ECMzj9bb0yDmGaYY2z39YpMncWw="},"36e776b4e89821ff6880f4ad6adcaa33bc48109abf98f594a3bf145a513c6a20":{"iv":"3A8mgsMd9hQZYjPT","ct":"/lz77oh9ATi6mqxJKcvafKE+iXZkGXDT3CokhtV1/Ok49EA2MHGdnIQiX802a/tS72u6unb5273Jeh+xYNzmYQ=="},"e84bd7fbf6cedabbfdcfdc4ae8fd079c88451c42aa5a8e043ae7aea0841f2133":{"iv":"z8tXGsbrBBw3Dujq","ct":"NXk4juTh0E/kIXW+KxPRIHIVc+PsHREArzywWZMM3CEcWTXSksan3XvnrCiz50ONb6UthQjBzrFPh558+3j3JsWO"},"9709d430aae4c86b844fe91a37cdaf796fa7613271f6294808a27abbfcd9bc65":{"iv":"mxDXHV9kVDMo047j","ct":"fivyBM3eYjOJ/84KGj3N5qFbYg3TeoFtKZC0OZdyxYfMhgEWXnBHOsvRS+1INoPuDmcjpSpquhfo0E029Pru"},"e94203146b717879d7d6c415eb2a0349229d35eab765f54a604844add5e6a920":{"iv":"CiCYis7l+s7fmPf3","ct":"sr0PC797Kmmz0K28dt/AMDXB5zCQ5BeNguAW7TDWmPVkrkZ4pP3j+qE8SmbbLvFUyYYHyxsAgkP/DW1jrMKnQg=="},"03c8486a7a32a44893970f93f8b7fc298a120470b70bf6e8b4b6ef821c605aaa":{"iv":"z3NBQ3ipL+Nz//aQ","ct":"gK0HUD5AfZ26CN9aJwZvlzyLbMvOjfBtNNtoAObl27hDjGeeOIomWrOsKCT9x7WttAngW0aNvQXB7OICKDjHslmHUHY="},"936a263698acb4e4f8cf7aebe36f8d609ad7bc5c5d14019cd461cc9d7187c0e3":{"iv":"hk/6Wk08S9auTNC4","ct":"adIwRww3JzbnoAeRrdMiwVY4S/kYv9Smjqvgtskj32JoNLYeYqYSQkEU6HSA7D6F+eJvYyVkvnNmIDydJHmSNbg="},"1f5dcf90dd68cc9a158dcca9ecaf9f4fe45b26a61bf11eeb0900d44b8ed4a6dd":{"iv":"r0Fo5HxoqzlAWus1","ct":"KAMmP87mLCBO3MMjiL7Vpzo8KnKofTtqi5YAB3AGE9Us42Nb6731ZabMwMyoU40Vdrea61h5LPE3MwzWhw=="},"4aaf8b55ef6e636721c364f513fb220566358afb58119657ce99180558c2fd0b":{"iv":"TlnQI/Xz7KAXCuJZ","ct":"FaVtizJAOy3zZtZ2XWuy5sBx4MsZwuggpT6U20WXohdeYcCBueTwnHx2H4zM11Xyj4YytZE9p3fLkq9H"},"d81bb40f30d1dae145f3326066d559da3fefcdcad05bc087ff5a63ef3c5d8ecd":{"iv":"Hd3QagyDKBILKkQk","ct":"KV7rB+4gpTKi5cLBezuAR/8gq/c8zXJes+r3WOgGg8oE1E0nswcNatVWtgcm5w2i02VOkHcW/ESObWHFxmk9nw=="},"01c57214e11e15ea78b111a21385dd2d8638bdaca1bac4b28c390272acaab0da":{"iv":"7EK5qKL4qRuU1i8P","ct":"pdlAS/JCHX4IcT8LtMWZRiXJ8z0PQ2mPUvYLpjw3n8vYlIiUdDjNoo9i/qKDBHnt0XOKffZY2Y11xANSQgs/aT0="},"c7011516b2613d6d9f77bb2512495f0fbed0de29d30ca23d992e764ba7f97e10":{"iv":"QsLnmPWcdNuUoSJP","ct":"IksuSLRy7MYEGhb4S0W7T92+dxOOnM956dVbFWifI59FBWLHt6hecYy4QjB5T4+hxo/c2r13f8Iae/9k5RI="},"5d05e6c51de8dcab54c55c7e3438c4e92d534ffe391990760b83e10abc3779e7":{"iv":"OSKkLZg4zWNNVzaL","ct":"Ahm9snpNARmjdnY1ZOAJnZT6XgnFwAQw6d/FXit0dR00FC7BFMG7ZVL0UyxDnQoEMMj/Hz93+w9y9Ce36rhIrw=="},"3927c3dc09917967aef8a09d61f1e0a281ebd0af76ace3197b97745576a2e41c":{"iv":"9k0hDHACj1Czha55","ct":"3KMPBo3jl0HsDth9xXtMQPEF/TueVl6S6PIHD643a5MqN+VzRhcgg3zXEz6lednuD2Db3qkAaitbhH2YBOL3yTr+Ww=="},"eb0a32c7fed66097d059525ad290da07538ea834fd27ebcdd4e2ccb10c2babd4":{"iv":"f0a1h7EjEQKE8hjw","ct":"f3254iU6jvtHru2YyuFrDx0NvabSUN7jwWft0rVEN3GFmg9bgvBdwrN2hlj3pOayNofI0QO+J2E4UEVr8ZAEuAI/9g=="},"4479d4332ddbcb5b8a561db86374a1f36e121442190f26c92035b18418c49197":{"iv":"pR7GlEolrb6GndM+","ct":"as3lrkWYWJhk80vlk1J5zPLk6GtoIN3VJiYgjzdYUM/Q98U5cJfqTSh0JlW4PpYzXUi0qm9LeGLTR4ZAkudO2A2LfZ4="},"650ec9bdd2f7fda36345a7ca2a148e667085eef5e4bab3f57111e58d7b149a3b":{"iv":"W6xe4A803h/aFOYW","ct":"KH98MHPOpAApaTkH9SKs9vrR6DRQ4/tm9MxVF7vTNwZw3nCX2lWQkuXpYj/a81GRAcnhYAfJlztAiFXJmah6EomehSzIcQ=="},"bfb54956ff2b8faf403abccbefe12ade28accec8833073848311709953de2613":{"iv":"PiQHk/xx8Ttp2E7A","ct":"LwFmfFuG9ySHTeLm7ND3cUFuufuO4dooeOfsT4fp+XirN82QH1qoFv02+dZAi+Po2DL7yvT5JrzvuJu/AUNHDNJdpQ=="},"537ada8ed6fbcfb5c975130f65a90786106c46a9befbb922300a6d4fcab5f9c6":{"iv":"0boVSWJFHl2HXp5S","ct":"n8W4fLdqnbkKPw/zE5NSWvjck/7mG1QIG23zw9XJ+Ceq9EUC++hWR81At+akXHMSw1IkmAQxLjs/updnPpa7Rt8="}},"admin":{"iv":"TFrIntHXkWEakuFR","ct":"wyKwjyv4xvzCoMRYuAktNzWrG2lHS1kV6hbcydULjzmUuS5YWQGuzVtb9D3GTn+QdKM0timvj/Xw7d4JeD3e9V3N0s3zqcaB6TKSICgHuE8QerM0+uZPQy7pJm0Kfl3spXAdaLg021wodV8+Heii79r5YwEI72lpxC7fgP3WUq9ik9aeHTL7k9X89Mze0gWoNnjUNNZR4Mg2CpnWfaxp7cT3UPMn+gS1ZI0xHcRi6B3vFqqClJkWLyxhnu4xxXj7xIXfqM1O+EChwxi7uLSjk9ajvVIRInQ+nByxCy4wSpAw8PwB8HTE/RRJx9da+6P8WDHeLNN0S5k69w4gAUFhaZT2044S6bx6UFsu9YAxiX/kzxZThZgQ2Gh/uDgdXazP7Sgx591D/M0qlleKhYRkwGsGwncXTpcA1utDtLvNaNSbRy5ZDoBAIaQZW5WO8CHaagQK5TuGCZUtvPxv0V9nv2jQ9zEjkJWqVg78G3SbMg5sbpgKYls8lBVXxrBMvVL66YeVr19BwqoW9vSUCHvLuOjQDLbZp5nCKhphHJ2bgTL4x8YDQHuDj0KQPj4IIHViIESFB2qfEQeCvEPXuYtj0C7e11AnuCwHBeVdBzyIUN769hWO8/81hY7btxSMRBRhE6ES9EUdwJu2Brg4MXWB5ABVB3FT7cbMvW/k3+Tf/hUDZx3SJBh3D57aaub7VwNHR9aGLDL/aBvoWdWFjf9gPnjqRfNutj8="},"clashes":[]}</script>
+<script id="page-script">
+(() => {
+const FONT_LINK = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">';
+const SEALED = JSON.parse(document.getElementById("sealed").textContent || "null");
+const $ = id => document.getElementById(id);
+const norm = s => String(s ?? "").normalize("NFC").trim().toLowerCase().replace(/\s+/g, " ");
+const fmt = iso => new Date(iso).toLocaleString("en-NZ", {day:"numeric", month:"short", hour:"numeric", minute:"2-digit"});
+function msg(el, text, kind){ el.innerHTML=""; if(!text) return; const p=document.createElement("p"); p.className="msg "+kind; p.textContent=text; el.appendChild(p); }
+
+// ---------- sealing: each person's match is encrypted with a key made from their own name ----------
+const te = new TextEncoder(), td = new TextDecoder();
+const hex = b => [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+const b64 = b => btoa(String.fromCharCode(...new Uint8Array(b)));
+const unb64 = s => Uint8Array.from(atob(s), c=>c.charCodeAt(0));
+const sha = s => crypto.subtle.digest("SHA-256", te.encode(s));
+const lookupId = async (salt, alias) => hex(await sha("lookup|"+salt+"|"+alias));
+const keyFor = async (salt, alias) => crypto.subtle.importKey("raw", await sha("key|"+salt+"|"+alias), "AES-GCM", false, ["encrypt","decrypt"]);
+async function seal(pairs, example, adminPass){
+  const salt = hex(crypto.getRandomValues(new Uint8Array(16)));
+  // every way a person might type their name: full name, preferred name, UPI, email
+  const aliasOwner = new Map(), clash = new Set();
+  pairs.forEach((p,i) => p.giver.aliases.forEach(a => { if(aliasOwner.has(a) && aliasOwner.get(a)!==i) clash.add(a); else aliasOwner.set(a,i); }));
+  const entries = {};
+  for(const [alias,i] of aliasOwner){
+    if(clash.has(alias)) continue;
+    const {giver, recipient} = pairs[i];
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const body = te.encode(JSON.stringify({giver:giver.name, recipient:recipient.name, hints:recipient.hints}));
+    const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv}, await keyFor(salt, alias), body);
+    entries[await lookupId(salt, alias)] = {iv:b64(iv), ct:b64(ct)};
+  }
+  const counts = {student:0, staff:0}; pairs.forEach(p=>counts[p.giver.group]++);
+  const aiv = crypto.getRandomValues(new Uint8Array(12));
+  const list = te.encode(JSON.stringify(pairs.map(p=>[p.giver.name, p.recipient.name, p.giver.group])));
+  const admin = {iv:b64(aiv), ct:b64(await crypto.subtle.encrypt({name:"AES-GCM", iv:aiv}, await adminKey(salt, adminPass), list))};
+  return {v:1, at:new Date().toISOString(), salt, counts, example:!!example, entries, admin, clashes:[...clash]};
+}
+async function adminKey(salt, pass){
+  const base = await crypto.subtle.importKey("raw", te.encode(pass), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2", salt:te.encode("admin|"+salt), iterations:200000, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]);
+}
+async function unsealAdmin(sealed, pass){
+  const pt = await crypto.subtle.decrypt({name:"AES-GCM", iv:unb64(sealed.admin.iv)}, await adminKey(sealed.salt, pass), unb64(sealed.admin.ct));
+  return JSON.parse(td.decode(pt));
+}
+async function unseal(sealed, typed){
+  const alias = norm(typed); if(!alias) return null;
+  const e = sealed.entries[await lookupId(sealed.salt, alias)]; if(!e) return null;
+  const pt = await crypto.subtle.decrypt({name:"AES-GCM", iv:unb64(e.iv)}, await keyFor(sealed.salt, alias), unb64(e.ct));
+  return JSON.parse(td.decode(pt));
+}
+
+// ---------- page ----------
+$("app").innerHTML = `
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Speech Group</div>
+    <h1>Secret <span>Santa</span></h1>
+    <p class="lede" id="lede"></p>
+  </header>
+  <form class="card" id="reveal-form" autocomplete="off">
+    <label>Your name <small>Your full name, or just your first name.</small>
+      <input type="text" id="r-name" maxlength="80" required autocapitalize="words" spellcheck="false">
+    </label>
+    <div class="row"><button class="btn" type="submit" id="r-go">Show my match</button></div>
+    <div id="r-msg"></div>
+    <div id="r-out"></div>
+  </form>
+  <div id="org" hidden class="stack" style="gap:18px">
+    <div class="divider">Organiser only</div>
+    <p class="note">Only you can see this part. People opening the shared link see just the box above.</p>
+    <section class="card" id="share" hidden>
+      <div class="live"><div class="big" id="live-n"></div><div><strong id="live-title"></strong><div class="note" id="live-detail"></div></div></div>
+      <p class="note">Download the reveal file and send it to the group by email or Teams. Each person opens it in their web browser and types their name. No account needed, and it works offline. Your husband opens the same file and uses <strong>Check the draw</strong> at the bottom.</p>
+      <div class="row"><button class="btn" id="dl" type="button">Download reveal file</button></div>
+      <div id="dl-msg"></div>
+    </section>
+    <section class="card">
+      <div class="step-head"><span class="num">1</span><h2>Enter the names</h2></div>
+      <p class="note">Load your Forms sign-ups, or type names in directly, one per line. People can look themselves up by full name, or by first name if nobody else shares it.</p>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Load Microsoft Forms responses">
+        <strong>Load sign-ups from Microsoft Forms</strong>
+        <span class="note">Drop the responses file here, or tap to choose. In Forms: Responses → Open in Excel, then save it.</span>
+      </div>
+      <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
+      <div id="f-msg"></div>
+      <div class="groups">
+        <label>Students <small id="c-student">0 people</small><textarea id="t-student" rows="9" spellcheck="false" placeholder="Aroha Tane&#10;Ben Lee&#10;Chitra Patel"></textarea></label>
+        <label>Staff <small id="c-staff">0 people</small><textarea id="t-staff" rows="9" spellcheck="false" placeholder="Emma Walker&#10;Fumiko Ito&#10;George Smith"></textarea></label>
+      </div>
+      <div id="s1-warn" class="stack"></div>
+    </section>
+    <section class="card" id="s2" aria-disabled="true">
+      <div class="step-head"><span class="num">2</span><h2>Draw and publish</h2></div>
+      <p class="note">Draws students and staff separately and seals the matches. Nobody, including you, can read the list; each person can only open their own match. After drawing you'll get a file to send round.</p>
+      <label>Checker password <small>Unlocks the full list of pairs at the bottom of the page, for whoever checks the draw. Pick something the group won't guess.</small>
+        <input type="text" id="a-pass" maxlength="80" autocomplete="off" spellcheck="false">
+      </label>
+      <div class="row"><button class="btn" id="draw" type="button" disabled>Draw names</button><button class="btn ghost" id="confirm" type="button" hidden>Yes, replace the current draw</button></div>
+      <div id="s3-msg"></div>
+    </section>
+  </div>
+  <details class="check" id="check" hidden>
+    <summary>Check the draw</summary>
+    <form class="stack" id="check-form" autocomplete="off" style="margin-top:12px">
+      <p class="note">For the person checking the draw. This shows everyone's match.</p>
+      <label>Checker password <input type="password" id="c-pass" maxlength="80"></label>
+      <div class="row"><button class="btn ghost" type="submit">Show all pairs</button></div>
+      <div id="c-msg"></div>
+      <div id="c-out" style="overflow-x:auto"></div>
+    </form>
+  </details>
+</div>`;
+
+// lede + live status
+if(!SEALED) $("lede").textContent = "Names haven't been drawn yet. Check back soon.";
+else $("lede").textContent = "Names have been drawn. Type your name to see who you're buying for, and keep it secret!";
+if(SEALED?.example){ const p=document.createElement("p"); p.className="msg warn"; p.textContent="This is a test draw with example names, not the real one."; $("lede").after(p); }
+$("r-name").disabled = $("r-go").disabled = !SEALED;
+
+$("reveal-form").addEventListener("submit", async e => {
+  e.preventDefault(); const out=$("r-out"); out.innerHTML=""; msg($("r-msg"),"","");
+  let m=null; try{ m = await unseal(SEALED, $("r-name").value); }catch{}
+  if(!m) return msg($("r-msg"), "No match for that name. Check the spelling, or try your full name. Still stuck? Ask the organiser.", "err");
+  const box=document.createElement("div"); box.className="reveal";
+  const a=document.createElement("div"); a.className="note"; a.textContent=`Kia ora ${m.giver}, you're Secret Santa for`;
+  const w=document.createElement("div"); w.className="who"; w.textContent=m.recipient;
+  box.append(a,w);
+  const h=document.createElement("div"); h.className="hints"; h.textContent = m.hints ? "Their gift hints: "+m.hints : "No gift hints given. Surprise them!"; box.appendChild(h);
+  const hide=document.createElement("button"); hide.type="button"; hide.className="btn ghost"; hide.textContent="Hide"; hide.style.marginTop="8px";
+  hide.onclick=()=>{ out.innerHTML=""; $("r-name").value=""; $("r-name").focus(); };
+  box.appendChild(hide); out.appendChild(box);
+});
+
+// ---------- organiser ----------
+const S = { people:[] };
+(async () => {
+  const user = window.claude ? await window.claude.use("user") : null;
+  const isOrg = user ? ((await user.isOwner()) || (await user.canEdit())) : false;
+  if(!isOrg) return;
+  $("org").hidden=false;
+  if(SEALED){
+$("live-n").textContent = SEALED.counts.student + SEALED.counts.staff;
+    $("live-title").textContent = SEALED.example ? "Test draw is live" : "Matches are live";
+    $("live-detail").textContent = `${SEALED.counts.student} students · ${SEALED.counts.staff} staff · drawn ${fmt(SEALED.at)}`;
+    $("draw").textContent = "Redraw"; $("share").hidden=false;
+  }
+})();
+
+const lists={student:$("t-student"), staff:$("t-staff")};
+function parse(){
+  const people=[], warn=$("s1-warn"); warn.innerHTML="";
+  const add=t=>{ const p=document.createElement("p"); p.className="msg warn"; p.textContent=t; warn.appendChild(p); };
+  const seen=new Map(); let clash=false;
+  for(const grp of ["student","staff"]){
+    const names=lists[grp].value.split("\n").map(s=>s.trim().replace(/\s+/g," ")).filter(Boolean);
+    const uniq=[...new Map(names.map(n=>[norm(n),n])).values()];
+    if(uniq.length<names.length) add(`Some ${grp} names are listed twice. Each person is counted once.`);
+    uniq.forEach(n=>{ if(seen.has(norm(n))){ clash=true; add(`"${n}" is in both lists. Remove them from one.`); } seen.set(norm(n),grp); people.push({name:n, group:grp, hints:""}); });
+    $("c-"+grp).textContent=`${uniq.length} ${uniq.length===1?"person":"people"}`;
+    if(uniq.length===1) add(`Only one ${grp==="staff"?"staff member":"student"}, so they can't be matched.`);
+  }
+  // lookup by full name, or by first name when nobody else shares it
+  const firsts=new Map(); people.forEach(p=>{ const f=norm(p.name).split(" ")[0]; firsts.set(f,(firsts.get(f)||0)+1); });
+  people.forEach(p=>{ const full=norm(p.name), f=full.split(" ")[0]; p.aliases=[full]; if(firsts.get(f)===1 && f!==full) p.aliases.push(f); });
+  S.people=people;
+  const ok=!clash && ["student","staff"].some(g=>people.filter(p=>p.group===g).length>=2);
+  $("draw").disabled=!ok; $("s2").setAttribute("aria-disabled",String(!ok)); $("confirm").hidden=true;
+  try{ localStorage.setItem("santa-lists", JSON.stringify({student:lists.student.value, staff:lists.staff.value})); }catch{}
+}
+try{ const d=JSON.parse(localStorage.getItem("santa-lists")||"null"); if(d){ lists.student.value=d.student||""; lists.staff.value=d.staff||""; } }catch{}
+lists.student.oninput=lists.staff.oninput=parse;
+const drop=$("drop"), file=$("file");
+drop.onclick=()=>file.click();
+drop.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); file.click(); } };
+drop.ondragover=e=>{ e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave=()=>drop.classList.remove("over");
+drop.ondrop=e=>{ e.preventDefault(); drop.classList.remove("over"); if(e.dataTransfer.files[0]) loadForms(e.dataTransfer.files[0]); };
+file.onchange=()=>{ if(file.files[0]) loadForms(file.files[0]); file.value=""; };
+const loadXlsx=()=>window.XLSX ? Promise.resolve() : new Promise((ok,bad)=>{ const s=document.createElement("script"); s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; s.onload=ok; s.onerror=bad; document.head.appendChild(s); });
+async function loadForms(f){
+  const out=$("f-msg");
+  try{
+    await loadXlsx();
+    const wb=XLSX.read(await f.arrayBuffer(), {type:"array"});
+    const aoa=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:"", raw:false});
+    const head=(aoa[0]||[]).map(h=>String(h).trim());
+    const find=re=>head.findIndex(h=>re.test(h));
+    const pref=find(/like.*used|preferred|go by|nickname/i);
+    const full=head.findIndex((h,i)=>/name/i.test(h) && i!==pref);
+    const grp=find(/group|student|staff/i), em=find(/e-?mail/i);
+    if(full<0 && pref<0) return msg(out,"Couldn't find a name column in that file. Is it the Forms responses file?","err");
+    if(grp<0) return msg(out,"Couldn't find the Student/Staff question in that file.","err");
+    const latest=new Map(), unknown=[];
+    for(const r of aoa.slice(1)){
+      const name=String((pref>=0&&r[pref])||(full>=0?r[full]:"")).trim().replace(/\s+/g," "); if(!name) continue;
+      const g=norm(r[grp]); const group=g.includes("staff")?"staff":g.includes("student")?"student":null;
+      if(!group){ unknown.push(name); continue; }
+      latest.set(em>=0&&r[em]?norm(r[em]):norm(name), {name, group}); // a resubmission replaces the earlier answer
+    }
+    const ppl=[...latest.values()];
+    lists.student.value=ppl.filter(p=>p.group==="student").map(p=>p.name).join("\n");
+    lists.staff.value=ppl.filter(p=>p.group==="staff").map(p=>p.name).join("\n");
+    parse();
+    msg(out, `Loaded ${ppl.length} people from ${f.name}. Check the lists below and fix any names by hand.`+(unknown.length?` Left out (no group chosen): ${unknown.join(", ")}.`:""), unknown.length?"warn":"ok");
+  }catch{ msg(out,"Couldn't read that file. Save the responses as .xlsx or .csv and try again.","err"); }
+}
+parse();
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const r=new Uint32Array(1); crypto.getRandomValues(r); const j=r[0]%(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function drawPairs(people){
+  const pairs=[];
+  for(const grp of ["student","staff"]){
+    const ps=shuffle(people.filter(p=>p.group===grp)); if(ps.length<2) continue;
+    // one loop per group: each person gives to the next, so nobody draws themselves
+    ps.forEach((p,i)=>pairs.push({giver:p, recipient:ps[(i+1)%ps.length]}));
+  }
+  return pairs;
+}
+function buildDoc(sealed){
+  const reset=document.head.querySelector("style")?.textContent ||
+    ":root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}";
+  const json=JSON.stringify(sealed).replace(/</g,"\\u003c");
+  const end="</"+"script>";
+  return '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>'+reset+'</style></head><body>'
+    + '<title>Secret Santa Draw</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n'+FONT_LINK+'\n'
+    + '<style id="page-style">'+$("page-style").textContent+'</style>\n<div id="app"></div>\n'
+    + '<script type="application/json" id="sealed">'+json+end+'\n'
+    + '<script id="page-script">'+$("page-script").textContent+end+'</body></html>';
+}
+async function publishDraw(){
+  const out=$("s3-msg"); $("draw").disabled=true; $("confirm").hidden=true;
+  try{
+    const pass=$("a-pass").value.trim();
+    if(pass.length<4){ $("draw").disabled=false; return msg(out,"Set a checker password first (at least 4 characters).","err"); }
+    const sealed=await seal(drawPairs(S.people), false, pass);
+    const art=await claude.use("artifact");
+    if(!art) throw {code:"unavailable"};
+    msg(out,"Drawing…","ok");
+    await art.publish(buildDoc(sealed)); // the page reloads into the new version
+  }catch(err){
+    $("draw").disabled=false;
+    if(err?.code==="conflict") return;
+    msg(out, err?.code==="not_writer"||err?.code==="not_granted" ? "This view can't save the page. Open it in claude.ai as the owner." : "Couldn't publish the draw. Try again in a moment.", "err");
+  }
+}
+$("draw").onclick=()=>{ if(SEALED){ $("confirm").hidden=false; msg($("s3-msg"),"This replaces the current draw. Anyone who has already looked will get a new match.","warn"); } else publishDraw(); };
+$("confirm").onclick=publishDraw;
+
+// exposed for a self-test only
+if(SEALED?.admin) $("check").hidden=false;
+$("check-form").addEventListener("submit", async e=>{
+  e.preventDefault(); const out=$("c-out"); out.innerHTML=""; msg($("c-msg"),"","");
+  let rows=null; try{ rows=await unsealAdmin(SEALED, $("c-pass").value.trim()); }catch{}
+  if(!rows) return msg($("c-msg"),"That password doesn't unlock the list.","err");
+  const t=document.createElement("table"); t.innerHTML="<thead><tr><th>Santa</th><th>Buys for</th><th>Group</th></tr></thead>";
+  const tb=document.createElement("tbody");
+  rows.sort((a,b)=>a[2].localeCompare(b[2])||a[0].localeCompare(b[0])).forEach(([g,r,grp])=>{ const tr=document.createElement("tr");
+    [[g],[r],[grp==="staff"?"Staff":"Student","g"]].forEach(([v,c])=>{ const td=document.createElement("td"); td.textContent=v; if(c) td.className=c; tr.appendChild(td); }); tb.appendChild(tr); });
+  t.appendChild(tb); out.appendChild(t);
+  const ok = rows.every(([g,r])=>g!==r) && new Set(rows.map(x=>x[1])).size===rows.length;
+  const p=document.createElement("p"); p.className="msg "+(ok?"ok":"err"); p.style.marginTop="10px";
+  p.textContent = ok ? `All ${rows.length} people give one gift and get one gift. Nobody has themselves.` : "Something's wrong with this draw. Redraw it.";
+  out.appendChild(p);
+  const hide=document.createElement("button"); hide.type="button"; hide.className="btn ghost"; hide.textContent="Hide list"; hide.style.marginTop="10px";
+  hide.onclick=()=>{ out.innerHTML=""; $("c-pass").value=""; }; out.appendChild(hide);
+});
+$("dl").onclick = async ()=>{
+  const out=$("dl-msg"); const dl = window.claude ? await window.claude.use("downloads") : null;
+  if(!dl) return msg(out,"Downloads aren't available in this view. Open the page in claude.ai.","err");
+  try{ await dl.save({filename:"Speech Group Secret Santa.html", data:buildDoc(SEALED)}); msg(out,"Saved. Attach this file to your email or Teams message.","ok"); }
+  catch(e){ if(e?.code!=="declined") msg(out,"Couldn't save the file. Try again.","err"); }
+};
+window.__santa={seal, unseal, unsealAdmin, drawPairs, norm};
+})();
+</script></body></html>
