@@ -200,7 +200,7 @@ $("app").innerHTML = `
     <p class="lede" id="lede"></p>
   </header>
   <form class="card" id="reveal-form" autocomplete="off">
-    <label>Your name <small>Your full name, or just your first name.</small>
+    <label>Your name <small>Just your first name.</small>
       <input type="text" id="r-name" maxlength="80" required autocapitalize="words" spellcheck="false">
     </label>
     <div class="row"><button class="btn" type="submit" id="r-go">Show my match</button></div>
@@ -262,7 +262,7 @@ $("r-name").disabled = $("r-go").disabled = !SEALED;
 $("reveal-form").addEventListener("submit", async e => {
   e.preventDefault(); const out=$("r-out"); out.innerHTML=""; msg($("r-msg"),"","");
   let m=null; try{ m = await unseal(SEALED, $("r-name").value); }catch{}
-  if(!m) return msg($("r-msg"), "No match for that name. Check the spelling, or try your full name. Still stuck? Ask the organiser.", "err");
+  if(!m) return msg($("r-msg"), "No match for that name. Check the spelling of your first name. Still stuck? Ask the organiser.", "err");
   const box=document.createElement("div"); box.className="reveal";
   const a=document.createElement("div"); a.className="note"; a.textContent=`Kia ora ${m.giver}, you're Secret Santa for`;
   const w=document.createElement("div"); w.className="who"; w.textContent=m.recipient;
@@ -388,7 +388,9 @@ $("draw").onclick=()=>{ if(SEALED){ $("confirm").hidden=false; msg($("s3-msg"),"
 $("confirm").onclick=publishDraw;
 
 // exposed for a self-test only
-if(SEALED?.admin) $("check").hidden=false;
+// "Check the draw" only appears when the address ends in #check
+const showCheck=()=>{ $("check").hidden = !(SEALED?.admin && location.hash==="#check"); if(!$("check").hidden) $("check").open=true; };
+showCheck(); addEventListener("hashchange", showCheck);
 $("check-form").addEventListener("submit", async e=>{
   e.preventDefault(); const out=$("c-out"); out.innerHTML=""; msg($("c-msg"),"","");
   let rows=null; try{ rows=await unsealAdmin(SEALED, $("c-pass").value.trim()); }catch{}
